@@ -1,0 +1,15 @@
+# Core dependencies for example implementation
+playwright==1.58.0
+pytest==9.0.2 
+pytest-playwright==0.7.2
+
+# Environment variable management
+python-dotenv==1.0.1
+
+# Test dependencies for advanced features
+pytest-dependency==0.6.1  # For sequential test execution
+pytest-html==4.1.1
+pytest-xdist==3.8.0
+
+# Code Quality
+flake8==7.1.1

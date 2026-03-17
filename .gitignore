@@ -1,0 +1,60 @@
+# Python specific
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+.venv/
+venv/
+env/
+
+# pytest
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# temporary files
+*.swp
+*.swo
+*~
+
+# packages
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# logs and databases
+*.log
+*.sql
+*.sqlite
+logs/
+
+# OS generated files
+.DS_Store*
+ehthumbs.db
+Icon?
+Thumbs.db
+*:Zone.Identifier
+
+# intellij
+*.iml
+.idea/
+
+# VS Code
+.vscode/
+
+# Playwright
+.auth/
+test-results/
+playwright-report/
+reports/
+
+# Environment variables
+# .env
