@@ -4,12 +4,11 @@ This module provides global teardown functionality that cleans up
 authentication state after all tests complete.
 """
 
-import asyncio
 import json
 import os
 import sys
 from pathlib import Path
-from playwright.async_api import async_playwright
+from playwright.sync_api import sync_playwright
 
 
 # Import STORAGE_STATE from conftest
@@ -18,21 +17,21 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 from conftest import STORAGE_STATE
 
 
-async def clear_browser_data() -> None:
+def clear_browser_data() -> None:
     """
     Clear all cookies and browser data.
     
     This function launches a temporary browser to clear cookies
     """
     try:
-        async with async_playwright() as p:
-            browser = await p.chromium.launch()
-            context = await browser.new_context(storage_state=STORAGE_STATE if os.path.exists(STORAGE_STATE) else None)
+        with sync_playwright() as p:
+            browser = p.chromium.launch()
+            context = browser.new_context(storage_state=STORAGE_STATE if os.path.exists(STORAGE_STATE) else None)
             
-            # Clear all cookies (matching TypeScript: await page.context().clearCookies())
-            await context.clear_cookies()
+            # Clear all cookies (matching TypeScript: page.context().clearCookies())
+            context.clear_cookies()
             
-            await browser.close()
+            browser.close()
     except Exception as e:
         print(f"Warning: Could not clear cookies: {e}")
 
@@ -50,7 +49,7 @@ def global_teardown() -> None:
     
     try:
         # Clear all cookies (equivalent to TypeScript clearCookies)
-        asyncio.run(clear_browser_data())
+        clear_browser_data()
         
         # Reset the storage state file
         if os.path.exists(STORAGE_STATE):

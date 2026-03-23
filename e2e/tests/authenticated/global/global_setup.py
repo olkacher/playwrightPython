@@ -4,11 +4,10 @@ This module provides global setup functionality that logs in a user and stores
 the authenticated browser state for use in authenticated tests.
 """
 
-import asyncio
 import os
 import sys
 from pathlib import Path
-from playwright.async_api import async_playwright
+from playwright.sync_api import sync_playwright
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -20,7 +19,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 from conftest import STORAGE_STATE
 
 
-async def global_setup() -> None:
+def global_setup() -> None:
     """
     Global setup function that logs in a user and stores authenticated browser state.
     
@@ -34,10 +33,10 @@ async def global_setup() -> None:
     """
     print("Global setup: Initially log in user and store authenticated browser state")
     
-    async with async_playwright() as p:
+    with sync_playwright() as p:
         # Launch browser
-        browser = await p.chromium.launch()
-        page = await browser.new_page()
+        browser = p.chromium.launch()
+        page = browser.new_page()
         
         # Get credentials from environment
         username = os.getenv("TEST_USER_NAME")
@@ -49,24 +48,24 @@ async def global_setup() -> None:
         # Navigate to sign-in page (equivalent to SignInPage.goto())
         base_url = os.getenv("BASE_URL", "http://frontend-ta-realworldapp.apps.os-prod.lab.proficom.de")
         signin_url = f"{base_url}/signin"
-        await page.goto(signin_url, wait_until='load')
+        page.goto(signin_url, wait_until='load')
         
-        await page.fill("#username", username)
-        await page.fill("#password", password)
-        await page.click("//button[@data-test='signin-submit']")
+        page.fill("#username", username)
+        page.fill("#password", password)
+        page.click("//button[@data-test='signin-submit']")
         
         # Wait for successful login (wait for redirect away from signin page)
-        await page.wait_for_url(lambda url: "/signin" not in url, timeout=10000)
+        page.wait_for_url(lambda url: "/signin" not in url, timeout=10000)
         
         # Ensure .auth directory exists
         Path(".auth").mkdir(exist_ok=True)
         
         # Save session
-        await page.context.storage_state(path=STORAGE_STATE)
+        page.context.storage_state(path=STORAGE_STATE)
         print(f"Authenticated browser state is stored in {STORAGE_STATE}")
         
         # Close the browser
-        await browser.close()
+        browser.close()
 
 
 def pytest_configure(config):
@@ -102,9 +101,9 @@ def pytest_configure(config):
     
     if run_setup:
         print("Running global authentication setup...")
-        asyncio.run(global_setup())
+        global_setup()
 
 
 if __name__ == "__main__":
     # Allow running this script directly for testing
-    asyncio.run(global_setup())
+    global_setup()
