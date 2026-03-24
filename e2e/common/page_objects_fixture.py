@@ -9,7 +9,6 @@ from e2e.pageobjects.top_menu_page import TopMenuPage
 from e2e.pageobjects.new_transaction_page import NewTransactionPage
 from e2e.pageobjects.personal_page import PersonalPage
 from e2e.pageobjects.transaction_detail_page import TransactionDetailPage
-from e2e.common.browser_sync_utils import BrowserSyncUtils
 
 
 @pytest.fixture
@@ -46,9 +45,3 @@ def personal_page(page: Page) -> PersonalPage:
 def transaction_detail_page(page: Page) -> TransactionDetailPage:
     """Provides a TransactionDetailPage instance."""
     return TransactionDetailPage(page)
-
-
-@pytest.fixture  
-def browser_sync_utils(page: Page) -> BrowserSyncUtils:
-    """Provides a BrowserSyncUtils instance."""
-    return BrowserSyncUtils(page)
