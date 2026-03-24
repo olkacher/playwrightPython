@@ -9,8 +9,7 @@ class TopMenuPage(BasePage):
     
     def __init__(self, page: Page):
         super().__init__(page)
-        self.a_new_transaction: Locator = page.locator('//a[@data-test="nav-top-new-transaction"]')
-        self.a_tab_mine: Locator = page.locator('//a[@data-test="nav-personal-tab"]')
+        self.a_new_transaction: Locator = page.get_by_role("button", name="New")
     
     def click_new_transaction(self) -> None:
         """Starts a new transaction."""
@@ -18,4 +17,4 @@ class TopMenuPage(BasePage):
     
     def navigate_to_tab_mine(self) -> None:
         """Navigates to the 'My Transactions' tab."""
-        self.a_tab_mine.click()
+        self.click_tab("Mine")

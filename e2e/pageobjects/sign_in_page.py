@@ -11,7 +11,6 @@ class SignInPage(BasePage):
         super().__init__(page)
         self.input_username: Locator = page.locator('#username')
         self.input_password: Locator = page.locator('#password')
-        self.btn_sign_in: Locator = page.locator('//button[@data-test="signin-submit"]')
     
     def goto(self) -> None:
         """Navigate to the sign-in page."""
@@ -21,4 +20,4 @@ class SignInPage(BasePage):
         """Login with the provided username and password."""
         self.input_username.fill(username)
         self.input_password.fill(password)
-        self.btn_sign_in.click()
+        self.click_button("Sign In")
