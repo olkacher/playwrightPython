@@ -10,7 +10,7 @@ class SideMenuPage(BasePage):
     
     def __init__(self, page: Page):
         super().__init__(page)
-        self.div_username: Locator = page.locator("//div[contains(@class, 'Grid-item')]//*[@data-test='sidenav-username']")
+        self.div_username: Locator = page.locator('[data-test="sidenav-username"]')
     
     def get_username(self) -> Optional[str]:
         """Returns the username displayed in the side menu."""
