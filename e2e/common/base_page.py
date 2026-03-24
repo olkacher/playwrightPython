@@ -21,3 +21,9 @@ class BasePage:
     def navigate_to(self, path: str) -> None:
         """Helper function to navigate to the given path."""
         self.page.goto(path, wait_until='load')
+
+    def click_button(self, name: str) -> None:
+        self.page.get_by_role("button", name=name).click()
+
+    def click_tab(self, name: str) -> None:
+        self.page.get_by_role("tab", name=name).click()
