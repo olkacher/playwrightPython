@@ -40,7 +40,7 @@ class TestTransactionFlowSuite:
         top_menu_page.navigate_to_tab_mine()
         expect(page).to_have_url(re.compile(r".*\/personal$"))
         
-        personal_page.open_first_transaction()
+        personal_page.open_first_transaction_with_note(self.NOTE)
         expect(page).to_have_url(re.compile(r".*\/transaction\/.*"))
         
         actual_amount = transaction_detail_page.get_transaction_amount()

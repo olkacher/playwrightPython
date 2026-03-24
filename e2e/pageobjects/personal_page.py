@@ -9,8 +9,8 @@ class PersonalPage(BasePage):
     
     def __init__(self, page: Page):
         super().__init__(page)
-        self.link_first_transaction_item: Locator = page.locator("//li[starts-with(@data-test, 'transaction-item-')]").first
     
-    def open_first_transaction(self) -> None:
+    def open_first_transaction_with_note(self, note: str) -> None:
         """Opens the first transaction in the list."""
-        self.link_first_transaction_item.click()
+        self.page.locator("li", has_text=note).first.click()
+
