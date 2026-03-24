@@ -8,7 +8,7 @@ from playwright.sync_api import Page, expect
 class TestTransactionFlowSuite:
     """Tests for creating and verifying transactions. Tests run sequentially with shared state."""
     
-    AMOUNT = "52.00"
+    AMOUNT = "57.00"
     NOTE = "test note"
     TRANSACTION_TESTUSER = "April"
     
@@ -17,8 +17,7 @@ class TestTransactionFlowSuite:
         pass
     
     @pytest.mark.authenticated
-    @pytest.mark.dependency()
-    def test_should_create_new_transaction(self, page: Page, top_menu_page, new_transaction_page):
+    def test_should_create_new_transaction(self, page: Page, top_menu_page, new_transaction_page, personal_page, transaction_detail_page,):
         """Creates a new transaction with contact selection and payment info."""
         page.goto("/")
         
@@ -36,15 +35,8 @@ class TestTransactionFlowSuite:
         
         transaction_submitted = new_transaction_page.is_alert_transaction_submitted_visible()
         assert transaction_submitted, "Transaction submission alert should be visible"
-        
-        page.screenshot(path="./e2e/reports/new_transaction.png", full_page=True)
-    
-    @pytest.mark.authenticated
-    @pytest.mark.dependency(depends=["TestTransactionFlowSuite::test_should_create_new_transaction"])
-    def test_should_check_transaction_details(self, page: Page, top_menu_page, personal_page, transaction_detail_page):
-        """Verifies the transaction details match the created transaction."""
-        page.goto("/")
-        
+
+        new_transaction_page.return_to_transactions()
         top_menu_page.navigate_to_tab_mine()
         expect(page).to_have_url(re.compile(r".*\/personal$"))
         
