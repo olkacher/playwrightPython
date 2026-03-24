@@ -10,11 +10,7 @@ class SideMenuPage(BasePage):
     
     def __init__(self, page: Page):
         super().__init__(page)
-        self.div_username: Locator = page.locator('[data-test="sidenav-username"]')
-    
-    def get_username(self) -> Optional[str]:
-        """Returns the username displayed in the side menu."""
-        return self.div_username.text_content()
+        self.username: Locator = page.locator('[data-test="sidenav-username"]')
     
     def logout(self) -> None:
         """Logs out the user."""

@@ -18,7 +18,13 @@ class TestLoginAndLogout:
         """Teardown after each test."""
         pass
     
-    def test_should_login_and_logout_successfully(self, page: Page, sign_in_page, side_menu_page):
+    def test_should_login_and_logout_successfully(
+            self, 
+            page: Page, 
+            sign_in_page, 
+            side_menu_page
+        ):
+
         """Verifies user can login and logout successfully."""
         sign_in_page.goto()
         expect(page).to_have_url(re.compile(r".*\/signin$"))
@@ -26,8 +32,7 @@ class TestLoginAndLogout:
         sign_in_page.login(os.getenv("TEST_USER_NAME"), os.getenv("TEST_PASSWORD"))
         
         expected_username = f"@{os.getenv('TEST_USER_NAME')}"
-        actual_username = side_menu_page.get_username()
-        assert actual_username == expected_username, f"Expected username {expected_username}, but got {actual_username}"
+        expect(side_menu_page.username).to_have_text(expected_username)
         
         page.screenshot(path="./e2e/reports/login_screenshot.png", full_page=True)
         

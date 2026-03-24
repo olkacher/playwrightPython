@@ -27,7 +27,8 @@ class TestTransactionFlowSuite:
         personal_page, 
         transaction_detail_page,
     ):
-        
+        """Verifies user can create a new transaction."""
+
         page.goto("/")
         
         top_menu_page.click_new_transaction()
