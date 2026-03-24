@@ -26,7 +26,6 @@ from e2e.common.page_objects_fixture import (
     new_transaction_page,
     personal_page,
     transaction_detail_page,
-    browser_sync_utils
 )
 
 # Configuration (equivalent to baseURL and other settings)
