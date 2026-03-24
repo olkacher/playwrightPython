@@ -11,7 +11,6 @@ class SideMenuPage(BasePage):
     def __init__(self, page: Page):
         super().__init__(page)
         self.div_username: Locator = page.locator("//div[contains(@class, 'Grid-item')]//*[@data-test='sidenav-username']")
-        self.div_logout: Locator = page.locator("//div[@data-test='sidenav-signout']")
     
     def get_username(self) -> Optional[str]:
         """Returns the username displayed in the side menu."""
@@ -19,4 +18,4 @@ class SideMenuPage(BasePage):
     
     def logout(self) -> None:
         """Logs out the user."""
-        self.div_logout.click()
+        self.click_button("Sign Out")
