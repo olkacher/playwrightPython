@@ -14,4 +14,4 @@ class SideMenuPage(BasePage):
     
     def logout(self) -> None:
         """Logs out the user."""
-        self.click_button("Sign Out")
+        self.click_button("Logout")
