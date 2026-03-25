@@ -14,8 +14,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Import STORAGE_STATE from conftest
-# Add parent directory to path to import from conftest
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 from conftest import STORAGE_STATE
 
 
