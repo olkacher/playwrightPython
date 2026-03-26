@@ -5,6 +5,7 @@ the authenticated browser state for use in authenticated tests.
 """
 
 import os
+import sys
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 from dotenv import load_dotenv
@@ -14,10 +15,9 @@ from e2e.pageobjects.sign_in_page import SignInPage
 load_dotenv()
 
 # Import STORAGE_STATE from conftest
-try:
-    from conftest import STORAGE_STATE
-except ImportError:
-    STORAGE_STATE = os.getenv("STORAGE_STATE", ".auth/user.json")
+# Add parent directory to path to import from conftest
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
+from conftest import STORAGE_STATE
 
 
 def global_setup() -> None:
