@@ -5,16 +5,19 @@ the authenticated browser state for use in authenticated tests.
 """
 
 import os
-import sys
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 from dotenv import load_dotenv
+from e2e.pageobjects.sign_in_page import SignInPage
 
 # Load environment variables
 load_dotenv()
 
 # Import STORAGE_STATE from conftest
-from conftest import STORAGE_STATE
+try:
+    from conftest import STORAGE_STATE
+except ImportError:
+    STORAGE_STATE = os.getenv("STORAGE_STATE", ".auth/user.json")
 
 
 def global_setup() -> None:
@@ -43,17 +46,14 @@ def global_setup() -> None:
         if not username or not password:
             raise ValueError("TEST_USER_NAME and TEST_PASSWORD must be set in environment variables")
         
-        # Navigate to sign-in page (equivalent to SignInPage.goto())
+        # Navigate to sign-in page
         base_url = os.getenv("BASE_URL", "http://frontend-ta-realworldapp.apps.os-prod.lab.proficom.de")
         signin_url = f"{base_url}/signin"
         page.goto(signin_url, wait_until='load')
         
-        page.fill("#username", username)
-        page.fill("#password", password)
-        page.click("//button[@data-test='signin-submit']")
-        
-        # Wait for successful login (wait for redirect away from signin page)
-        page.wait_for_url(lambda url: "/signin" not in url, timeout=10000)
+        # Use SignInPage to handle login (DRY principle)
+        sign_in_page = SignInPage(page)
+        sign_in_page.login(username, password)
         
         # Ensure .auth directory exists
         Path(".auth").mkdir(exist_ok=True)

@@ -21,3 +21,4 @@ class SignInPage(BasePage):
         self.username_input.fill(username)
         self.password_input.fill(password)
         self.click_button("Sign In")
+        self.page.wait_for_url(lambda url: "/signin" not in url, timeout=10000)
