@@ -42,7 +42,7 @@ def browser_type_launch_args(browser_type_launch_args):
     """Configure browser launch with settings from playwright.config.ts"""
     return {
         **browser_type_launch_args,
-        "headless": False,                    # If false, a new browser window is opened for each test
+        "headless": True,                     # If false, a new browser window is opened for each test
         "args": ["--start-maximized"],        # Ensures the browser starts maximized
     }
 
