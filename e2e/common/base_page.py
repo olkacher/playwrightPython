@@ -1,9 +1,11 @@
 """BasePage is the base class for all page objects."""
 
+from abc import ABC, abstractmethod
 from playwright.sync_api import Page
 
 
-class BasePage:
+
+class BasePage(ABC):
     """Base class for all page objects. Provides common navigation and utility methods."""
     
     def __init__(self, page: Page) -> None:
@@ -14,9 +16,10 @@ class BasePage:
         """Returns the current URL of the page."""
         return self.page.url
     
+    @abstractmethod
     def goto(self) -> None:
-        """Open the expected page. Should be overridden by subclasses."""
-        self.navigate_to("/")
+        """Navigate to the page. Must be implemented by subclasses."""
+        pass
     
     def navigate_to(self, path: str) -> None:
         """Helper function to navigate to the given path."""
