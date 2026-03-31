@@ -33,10 +33,7 @@ class TestLoginAndLogout:
         
         expected_username = f"@{os.getenv('TEST_USER_NAME')}"
         expect(side_menu_page.username).to_have_text(expected_username)
-        
-        page.screenshot(path="./e2e/reports/login_screenshot.png", full_page=True)
-        
+               
         side_menu_page.logout()
         expect(page).to_have_url(re.compile(r".*\/signin$"))
         
-        page.screenshot(path="./e2e/reports/logout_screenshot.png", full_page=True)
