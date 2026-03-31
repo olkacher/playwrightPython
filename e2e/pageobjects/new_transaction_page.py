@@ -28,6 +28,10 @@ class NewTransactionPage(BasePage):
     def submit_payment(self) -> None:
         """Submits the payment."""
         self.click_button("Pay")
+
+    def submit_request(self) -> None:
+        """Submits the request."""
+        self.click_button("Request")
     
     def return_to_transactions(self) -> None:
         """Returns to the transactions page."""
