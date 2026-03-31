@@ -9,13 +9,17 @@ from e2e.pageobjects.top_menu_page import TopMenuPage
 from e2e.pageobjects.new_transaction_page import NewTransactionPage
 from e2e.pageobjects.personal_page import PersonalPage
 from e2e.pageobjects.transaction_detail_page import TransactionDetailPage
-
+from e2e.pageobjects.home_page import HomePage
 
 @pytest.fixture
 def sign_in_page(page: Page) -> SignInPage:
     """Provides a SignInPage instance."""
     return SignInPage(page)
 
+@pytest.fixture
+def home_page(page: Page) -> HomePage:
+    """Provides a HomePage instance."""
+    return HomePage(page)
 
 @pytest.fixture
 def side_menu_page(page: Page) -> SideMenuPage:
@@ -34,12 +38,10 @@ def new_transaction_page(page: Page) -> NewTransactionPage:
     """Provides a NewTransactionPage instance."""
     return NewTransactionPage(page)
 
-
 @pytest.fixture
 def personal_page(page: Page) -> PersonalPage:
     """Provides a PersonalPage instance."""
     return PersonalPage(page)
-
 
 @pytest.fixture
 def transaction_detail_page(page: Page) -> TransactionDetailPage:
