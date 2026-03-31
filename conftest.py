@@ -18,17 +18,6 @@ load_dotenv()
 # Authentication state configuration
 STORAGE_STATE = ".auth/user.json"
 
-# Import fixtures to make them available (equivalent to TypeScript fixture imports)  
-from e2e.common.page_objects_fixture import (
-    home_page,
-    sign_in_page, 
-    side_menu_page,
-    top_menu_page, 
-    new_transaction_page,
-    personal_page,
-    transaction_detail_page,
-)
-
 # Configuration (equivalent to baseURL and other settings)
 BASE_URL = os.getenv("BASE_URL", "http://frontend-ta-realworldapp.apps.os-prod.lab.proficom.de")
 STORAGE_STATE = ".auth/user.json"
@@ -78,6 +67,7 @@ def browser_context_args(browser_context_args, request):
 # Register global setup/teardown plugins
 # Import the pytest hooks from global setup/teardown files
 pytest_plugins = [
+    "e2e.common.page_objects_fixture",
     "e2e.tests.authenticated.global.global_setup",
     "e2e.tests.authenticated.global.global_teardown",
 ]
