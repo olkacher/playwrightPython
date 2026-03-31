@@ -5,9 +5,6 @@ import re
 import os
 from playwright.sync_api import Page, expect
 
-from conftest import page
-
-
 class TestLoginAndLogoutWithoutPageObjects:
     """Tests for login and logout using direct Playwright API calls."""
     
@@ -27,10 +24,7 @@ class TestLoginAndLogoutWithoutPageObjects:
         
         expected_username = f"@{os.getenv('TEST_USER_NAME')}"
         expect(page.locator('[data-test="sidenav-username"]')).to_have_text(expected_username)
-        
-        page.screenshot(path='./e2e/reports/login_screenshot.png', full_page=True)
-        
+                
         page.click("[data-test='sidenav-signout']")
         expect(page).to_have_url(re.compile(r".*\/signin$"))
-        
-        page.screenshot(path='./e2e/reports/logout_screenshot.png', full_page=True)
+    
