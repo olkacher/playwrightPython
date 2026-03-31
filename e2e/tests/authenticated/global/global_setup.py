@@ -5,7 +5,6 @@ the authenticated browser state for use in authenticated tests.
 """
 
 import os
-import sys
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 from dotenv import load_dotenv
