@@ -4,9 +4,6 @@ import pytest
 import re
 from playwright.sync_api import Page, expect
 
-from e2e.common.page_objects_fixture import new_transaction_page, transaction_detail_page
-
-
 class TestTransactionFlowSuite:
     """Test for creating and verifying transactions. Assumes user is already authenticated."""
     
@@ -19,7 +16,7 @@ class TestTransactionFlowSuite:
         pass
     
     @pytest.mark.authenticated
-    def test_should_create_new_pay_transaction(
+    def test_should_create_new_payment_transaction(
         self, 
         page: Page, 
         top_menu_page, 
@@ -29,9 +26,7 @@ class TestTransactionFlowSuite:
     ):
         """Verifies user can create a new payment transaction."""
 
-        page.goto("/")
-        
-        top_menu_page.click_new_transaction()
+        new_transaction_page.goto()
         expect(page).to_have_url(re.compile(r".*\/transaction\/new$"))
         
         new_transaction_page.select_contact(self.TRANSACTION_TESTUSER)
@@ -61,9 +56,7 @@ class TestTransactionFlowSuite:
     ):
         """Verifies user can create a new request transaction."""
 
-        page.goto("/")
-        
-        top_menu_page.click_new_transaction()
+        new_transaction_page.goto()
         expect(page).to_have_url(re.compile(r".*\/transaction\/new$"))
         
         new_transaction_page.select_contact(self.TRANSACTION_TESTUSER)

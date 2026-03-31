@@ -1,11 +1,8 @@
 """Test sidebar menu items visibility using pre-authenticated state."""
 
 import os
-
 import pytest
 from playwright.sync_api import Page, expect
-
-from e2e.common.page_objects_fixture import side_menu_page
 
 class TestSidebarMenuItemsVisible:
     """Test sidebar menu items visibility. Assumes user is already authenticated."""
@@ -16,13 +13,13 @@ class TestSidebarMenuItemsVisible:
         pass
 
     @pytest.mark.authenticated
-    def test_sidebar_menu_items_visible(self, page: Page, side_menu_page):
+    def test_sidebar_menu_items_visible(self, page: Page, side_menu_page, home_page):
         """Verifies sidebar menu items are visible for authenticated user."""
         
         username = os.getenv("TEST_USER_NAME")
 
-        page.goto("/")
-        
+        home_page.goto()
+
         # Verify sidebar is visible
         expect(side_menu_page.sidebar).to_be_visible()
         
