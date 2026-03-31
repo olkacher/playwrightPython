@@ -20,6 +20,7 @@ STORAGE_STATE = ".auth/user.json"
 
 # Import fixtures to make them available (equivalent to TypeScript fixture imports)  
 from e2e.common.page_objects_fixture import (
+    home_page,
     sign_in_page, 
     side_menu_page,
     top_menu_page, 
