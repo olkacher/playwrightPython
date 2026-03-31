@@ -11,3 +11,7 @@ class TransactionDetailPage(BasePage):
         super().__init__(page)
         self.transaction_amount: Locator = page.locator('[data-test^="transaction-amount-"]')
     
+    def goto(self) -> None:
+        raise NotImplementedError
+    ("TransactionDetailPage does not support direct navigation without a transaction ID. "
+    "Open it via transaction list.")

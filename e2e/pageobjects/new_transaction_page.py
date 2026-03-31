@@ -14,6 +14,10 @@ class NewTransactionPage(BasePage):
         self.note_input: Locator = page.get_by_role("textbox", name="Note")
         self.alert_transaction_submitted: Locator = page.get_by_role("alert").filter(has_text="Transaction Submitted!")
     
+    def goto(self) -> None:
+        """Navigate to the new transaction page."""
+        self.navigate_to("/transaction/new")
+        
     def select_contact(self, search_string: str) -> None:
         """Search for a contact and select the first matching result."""
         self.user_search_input.fill(search_string)

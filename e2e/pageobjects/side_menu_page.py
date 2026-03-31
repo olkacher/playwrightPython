@@ -2,8 +2,7 @@
 
 from os import name
 
-from playwright.sync_api import Page, Locator
-from typing import Optional
+from playwright.sync_api import Page
 from ..common.base_page import BasePage
 
 
@@ -20,7 +19,10 @@ class SideMenuPage(BasePage):
 
         self.balance = page.locator('[data-test="sidenav-user-balance"]')
         self.balance_label = self.sidebar.get_by_role("heading", name="Account Balance")
-
+    
+    def goto(self):
+        raise NotImplementedError("SideMenuPage cannot be opened directly")
+    
     def logout(self) -> None:
         """Logs out the user."""
         self.click_button("Logout")

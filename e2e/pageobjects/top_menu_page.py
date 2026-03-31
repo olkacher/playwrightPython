@@ -11,9 +11,8 @@ class TopMenuPage(BasePage):
         super().__init__(page)
         self.a_new_transaction: Locator = page.get_by_role("button", name="New")
     
-    def click_new_transaction(self) -> None:
-        """Starts a new transaction."""
-        self.a_new_transaction.click()
+    def goto(self):
+        raise NotImplementedError("TopMenuPage cannot be opened directly")
     
     def navigate_to_tab_mine(self) -> None:
         """Navigates to the 'My Transactions' tab."""
