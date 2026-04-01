@@ -1,7 +1,5 @@
 """SideMenuPage handles side menu navigation and user actions."""
 
-from os import name
-
 from playwright.sync_api import Page
 from ..common.base_page import BasePage
 
