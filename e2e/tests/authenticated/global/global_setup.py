@@ -1,14 +1,15 @@
 """
 Global setup for authenticated tests.
-This module provides global setup functionality that logs in a user and stores
-the authenticated browser state for use in authenticated tests.
+
+Logs in a test user and stores browser authentication state
+for tests that require an authenticated session.
 """
 
 import os
-from pathlib import Path
+
 from playwright.sync_api import sync_playwright
 from dotenv import load_dotenv
-from pytest_playwright.pytest_playwright import context
+
 from config import (
     AUTH_DIR,
     STORAGE_STATE,
@@ -33,8 +34,9 @@ def global_setup() -> None:
     """
     print("Global setup: Initially log in user and store authenticated browser state")
     load_dotenv()  # Load environment variables from .env file
+    
     with sync_playwright() as p:
-        # Launch browser
+        # Launch browser, create isolated browser context (user session), and open a page
         browser = p.chromium.launch()
         context = browser.new_context()
         page = context.new_page()
@@ -65,43 +67,42 @@ def global_setup() -> None:
         # Close the browser
         browser.close()
 
+_setup_ran = False
 
-def pytest_configure(config):
+def _needs_global_setup(items) -> bool:
+    """Return True if at least one collected test requires authentication."""
+    for item in items:
+        # Preferred way: explicit marker
+        if item.get_closest_marker("authenticated"):
+            return True
+
+        # Fallback for demo project structure
+        if "authenticated" in str(item.fspath):
+            return True
+
+    return False
+
+def pytest_collection_modifyitems(config, items):
     """
-    Pytest configuration hook that runs the global setup.
-    
-    This function is automatically called by pytest during configuration
-    and runs our authentication setup before any tests execute.
-    
-    Setup runs if:
-    - Tests from authenticated/ directory are being run
-    - Tests with @pytest.mark.authenticated marker are being run
-    - Running tests from e2e/tests/ (includes authenticated tests)
+    Run global authentication setup only when collected tests require it.
+
+    This hook is called after pytest collects test items.
+    Setup runs when at least one collected test is marked as authenticated
+    or belongs to the authenticated test area.
     """
-    # Check if we're running authenticated tests
-    args = config.args
-    run_setup = False
+    global _setup_ran
+
+    if _setup_ran:
+        return  # Avoid running setup multiple times
     
-    # Check if any test path includes 'authenticated' or is a parent directory that includes authenticated tests
-    for arg in args:
-        arg_str = str(arg)
-        if 'authenticated' in arg_str:
-            run_setup = True
-            break
-        # If running from tests/ or e2e/tests/, assume authenticated tests are included
-        if arg_str.endswith('tests') or arg_str.endswith('tests/') or arg_str.endswith('tests\\'):
-            run_setup = True
-            break
-    
-    # Check if marker expression includes 'authenticated'
-    if config.getoption("markexpr", "") and "authenticated" in str(config.getoption("markexpr", "")):
-        run_setup = True
-    
-    if run_setup:
-        print("Running global authentication setup...")
+    if config.getoption("collectonly"):
+        return  # Skip setup during collection-only runs
+
+    if _needs_global_setup(items):
+        print("Detected authenticated tests. Running global setup...")
         global_setup()
-
+        _setup_ran = True
 
 if __name__ == "__main__":
-    # Allow running this script directly for testing
+    # For direct execution, run global setup unconditionally
     global_setup()
