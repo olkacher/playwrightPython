@@ -12,20 +12,19 @@ import pytest
 import os
 from dotenv import load_dotenv
 
+from config import (
+    STORAGE_STATE,
+    BASE_URL_ENV,
+    DEFAULT_TIMEOUT_MS,
+    TEST_USERNAME_ENV,
+    DEFAULT_BASE_URL,
+)
+
 # Load environment variables
 load_dotenv()
 
-# Authentication state configuration
-STORAGE_STATE = ".auth/user.json"
-
 # Configuration (equivalent to baseURL and other settings)
-BASE_URL = os.getenv("BASE_URL", "http://frontend-ta-realworldapp.apps.os-prod.lab.proficom.de")
-STORAGE_STATE = ".auth/user.json"
-
-# Test user credentials
-TEST_USER_NAME = os.getenv("TEST_USER_NAME")
-TEST_PASSWORD = os.getenv("TEST_PASSWORD")
-
+BASE_URL = os.getenv(BASE_URL_ENV, DEFAULT_BASE_URL)
 
 @pytest.fixture(scope="session")
 def browser_type_launch_args(browser_type_launch_args):
@@ -36,11 +35,10 @@ def browser_type_launch_args(browser_type_launch_args):
         "args": ["--start-maximized"],        # Ensures the browser starts maximized
     }
 
-
 @pytest.fixture(scope="function")
 def page(page):
     """Configure page with settings from playwright.config.ts"""
-    page.set_default_timeout(10000)  # actionTimeout: 10000
+    page.set_default_timeout(DEFAULT_TIMEOUT_MS)  # actionTimeout: 10000
     return page
 
 
@@ -56,13 +54,12 @@ def browser_context_args(browser_context_args, request):
     # Add authentication state for authenticated tests
     if request.node.get_closest_marker("authenticated"):
         # Check if storage state file exists
-        if os.path.exists(STORAGE_STATE):
-            context_args["storage_state"] = STORAGE_STATE
+        if STORAGE_STATE.exists():
+            context_args["storage_state"] = str(STORAGE_STATE)
         else:
             pytest.skip(f"Authentication state file {STORAGE_STATE} not found. Run authentication setup first.")
     
     return context_args
-
 
 # Register global setup/teardown plugins
 # Import the pytest hooks from global setup/teardown files
@@ -72,7 +69,6 @@ pytest_plugins = [
     "e2e.tests.authenticated.global.global_teardown",
 ]
 
-
 # Global setup and teardown hooks 
 def pytest_sessionstart(session):
     """
@@ -81,8 +77,7 @@ def pytest_sessionstart(session):
     """
     print("Global test environment setup...")
     print(f"Target application: {BASE_URL}")
-    print(f"Test user: {TEST_USER_NAME}")
-
+    print(f"Test user: {TEST_USERNAME_ENV}")
 
 def pytest_sessionfinish(session, exitstatus):
     """
