@@ -3,7 +3,6 @@
 from playwright.sync_api import Page, Locator
 from e2e.common.base_page import BasePage
 
-
 class SignInPage(BasePage):
     """Page object for the sign-in page."""
     
@@ -21,4 +20,4 @@ class SignInPage(BasePage):
         self.username_input.fill(username)
         self.password_input.fill(password)
         self.click_button("Sign In")
-        self.page.wait_for_url(lambda url: "/signin" not in url, timeout=10000)
+        self.page.get_by_role("button", name="Logout").wait_for()
