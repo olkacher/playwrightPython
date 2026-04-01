@@ -8,14 +8,16 @@ import os
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 from dotenv import load_dotenv
+from pytest_playwright.pytest_playwright import context
+from config import (
+    AUTH_DIR,
+    STORAGE_STATE,
+    BASE_URL_ENV,
+    TEST_USERNAME_ENV,
+    TEST_PASSWORD_ENV,
+    DEFAULT_BASE_URL,
+)
 from e2e.pageobjects.sign_in_page import SignInPage
-
-# Load environment variables
-load_dotenv()
-
-# Import STORAGE_STATE from conftest
-from conftest import STORAGE_STATE
-
 
 def global_setup() -> None:
     """
@@ -30,21 +32,22 @@ def global_setup() -> None:
     
     """
     print("Global setup: Initially log in user and store authenticated browser state")
-    
+    load_dotenv()  # Load environment variables from .env file
     with sync_playwright() as p:
         # Launch browser
         browser = p.chromium.launch()
-        page = browser.new_page()
+        context = browser.new_context()
+        page = context.new_page()
         
         # Get credentials from environment
-        username = os.getenv("TEST_USER_NAME")
-        password = os.getenv("TEST_PASSWORD")
+        username = os.getenv(TEST_USERNAME_ENV)
+        password = os.getenv(TEST_PASSWORD_ENV)
         
         if not username or not password:
-            raise ValueError("TEST_USER_NAME and TEST_PASSWORD must be set in environment variables")
+            raise ValueError(f"{TEST_USERNAME_ENV} and {TEST_PASSWORD_ENV} must be set in environment variables")
         
         # Navigate to sign-in page
-        base_url = os.getenv("BASE_URL", "http://frontend-ta-realworldapp.apps.os-prod.lab.proficom.de")
+        base_url = os.getenv(BASE_URL_ENV, DEFAULT_BASE_URL)
         signin_url = f"{base_url}/signin"
         page.goto(signin_url, wait_until='load')
         
@@ -53,10 +56,10 @@ def global_setup() -> None:
         sign_in_page.login(username, password)
         
         # Ensure .auth directory exists
-        Path(".auth").mkdir(exist_ok=True)
+        AUTH_DIR.mkdir(parents=True, exist_ok=True)
         
         # Save session
-        page.context.storage_state(path=STORAGE_STATE)
+        context.storage_state(path=str(STORAGE_STATE))        
         print(f"Authenticated browser state is stored in {STORAGE_STATE}")
         
         # Close the browser
