@@ -20,4 +20,6 @@ class SignInPage(BasePage):
         self.username_input.fill(username)
         self.password_input.fill(password)
         self.click_button("Sign In")
+
+    def wait_until_logged_in(self) -> None:
         self.page.get_by_role("button", name="Logout").wait_for()

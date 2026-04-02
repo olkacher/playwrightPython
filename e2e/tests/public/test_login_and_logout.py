@@ -30,6 +30,7 @@ class TestLoginAndLogout:
         expect(page).to_have_url(re.compile(r".*\/signin$"))
         
         sign_in_page.login(os.getenv("TEST_USER_NAME"), os.getenv("TEST_PASSWORD"))
+        sign_in_page.wait_until_logged_in() 
         
         expected_username = f"@{os.getenv('TEST_USER_NAME')}"
         expect(side_menu_page.username).to_have_text(expected_username)

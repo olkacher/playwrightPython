@@ -56,6 +56,7 @@ def global_setup() -> None:
         # Use SignInPage to handle login (DRY principle)
         sign_in_page = SignInPage(page)
         sign_in_page.login(username, password)
+        sign_in_page.wait_until_logged_in()  
         
         # Ensure .auth directory exists
         AUTH_DIR.mkdir(parents=True, exist_ok=True)
