@@ -5,6 +5,7 @@ This example demonstrates:
 - Authentication state management
 - Page object fixtures
 - Environment variable integration
+- Multi-browser test execution (chromium, firefox, webkit)
 - Multi-context test execution (public vs authenticated)
 """
 
