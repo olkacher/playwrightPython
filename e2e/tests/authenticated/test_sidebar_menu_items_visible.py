@@ -3,6 +3,14 @@
 import os
 import pytest
 from playwright.sync_api import Page, expect
+from e2e.common.assertion_helpers import (
+    assert_all,
+    check_contains_text,
+    check_enabled,
+    check_not_empty,
+    check_text,
+    check_visible,
+)
 
 class TestSidebarMenuItemsVisible:
     """Test sidebar menu items visibility. Assumes user is already authenticated."""
@@ -20,20 +28,22 @@ class TestSidebarMenuItemsVisible:
 
         home_page.goto()
 
-        # Verify sidebar is visible
-        expect(side_menu_page.sidebar).to_be_visible()
-        
-        # Verify user info is visible
-        expect(side_menu_page.avatar).to_be_visible()
-        expect(side_menu_page.user_full_name).to_be_visible()
-        expect(side_menu_page.user_full_name).to_have_text(self.USER_FULL_NAME)
-        expect(side_menu_page.username).to_be_visible()
-        expect(side_menu_page.username).to_contain_text("@" + username)
-        
-        # Verify balance info is visible
-        expect(side_menu_page.balance).to_be_visible()
-        expect(side_menu_page.balance).not_to_be_empty()
-        expect(side_menu_page.balance_label).to_be_visible()
+        checks = [
+            # Sidebar
+            check_visible("Sidebar", side_menu_page.sidebar),
+
+            # User Info
+            check_visible("User Avatar", side_menu_page.avatar),
+            check_visible("User Full Name", side_menu_page.user_full_name),
+            check_text("User Full Name Text", side_menu_page.user_full_name, self.USER_FULL_NAME),
+            check_visible("Username", side_menu_page.username),
+            check_contains_text("Username Text", side_menu_page.username, "@" + username),
+
+            # Balance Info
+            check_visible("Balance", side_menu_page.balance),
+            check_not_empty("Balance Not Empty", side_menu_page.balance),
+            check_visible("Balance Label", side_menu_page.balance_label),
+        ]
 
         # Verify menu items are visible
         menu_items = ["Home", "My Account", "Bank Accounts", "Notifications", "Logout"]
@@ -42,7 +52,11 @@ class TestSidebarMenuItemsVisible:
             button = side_menu_page.menu_button(item)
             icon = side_menu_page.menu_icon(item)
 
-            expect(button).to_be_visible()
-            expect(button).to_be_enabled()
-            expect(button).to_contain_text(item)
-            expect(icon).to_be_visible()
+            checks.extend([
+                check_visible(f"Menu button '{item}'", button),
+                check_enabled(f"Menu button '{item}'", button),
+                check_contains_text(f"Menu button '{item}' text", button, item),
+                check_visible(f"Menu icon '{item}'", icon),
+            ])
+
+        assert_all(checks)
