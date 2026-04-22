@@ -7,8 +7,8 @@ for tests that require an authenticated session.
 
 import os
 
-from playwright.sync_api import sync_playwright
 from dotenv import load_dotenv
+from playwright.sync_api import Playwright, BrowserType, sync_playwright
 
 from config import (
     AUTH_DIR,
@@ -20,90 +20,108 @@ from config import (
 )
 from e2e.pageobjects.sign_in_page import SignInPage
 
-def global_setup() -> None:
-    """
-    Global setup function that logs in a user and stores authenticated browser state.
-    
-    This function:
-    1. Launches a browser
-    2. Navigates to the sign-in page
-    3. Performs login with credentials from environment variables (using SignInPage pattern)
-    4. Saves the authentication state to .auth/user.json
-    5. Closes the browser
-    
-    """
-    print("Global setup: Initially log in user and store authenticated browser state")
-    load_dotenv()  # Load environment variables from .env file
-    
-    with sync_playwright() as p:
-        # Launch browser, create isolated browser context (user session), and open a page
-        browser = p.chromium.launch()
-        context = browser.new_context()
-        page = context.new_page()
-        
-        # Get credentials from environment
-        username = os.getenv(TEST_USERNAME_ENV)
-        password = os.getenv(TEST_PASSWORD_ENV)
-        
-        if not username or not password:
-            raise ValueError(f"{TEST_USERNAME_ENV} and {TEST_PASSWORD_ENV} must be set in environment variables")
-        
-        # Navigate to sign-in page
-        base_url = os.getenv(BASE_URL_ENV, DEFAULT_BASE_URL)
-        signin_url = f"{base_url}/signin"
-        page.goto(signin_url, wait_until='load')
-        
-        # Use SignInPage to handle login (DRY principle)
-        sign_in_page = SignInPage(page)
-        sign_in_page.login(username, password)
-        sign_in_page.wait_until_logged_in()  
-        
-        # Ensure .auth directory exists
-        AUTH_DIR.mkdir(parents=True, exist_ok=True)
-        
-        # Save session
-        context.storage_state(path=str(STORAGE_STATE))        
-        print(f"Authenticated browser state is stored in {STORAGE_STATE}")
-        
-        # Close the browser
-        browser.close()
+
+DEFAULT_BROWSER = "chromium"
+SUPPORTED_BROWSERS = {"chromium", "firefox", "webkit"}
 
 _setup_ran = False
+
+
+def _get_required_env(var_name: str) -> str:
+    value = os.getenv(var_name)
+    if not value:
+        raise ValueError(f"Environment variable '{var_name}' must be set")
+    return value
+
+
+def _get_browser_launcher(playwright: Playwright, browser_name: str) -> BrowserType:
+    browser_name = browser_name.strip().lower()
+
+    if browser_name not in SUPPORTED_BROWSERS:
+        raise ValueError(
+            f"Unsupported browser: {browser_name}. "
+            f"Supported browsers: {', '.join(sorted(SUPPORTED_BROWSERS))}"
+        )
+
+    return getattr(playwright, browser_name)
+
+
+def global_setup(browser_name: str = DEFAULT_BROWSER) -> None:
+    """
+    Log in a user and store authenticated browser state.
+
+    Args:
+        browser_name: Browser type to use for setup
+                      (chromium, firefox, webkit)
+    """
+    load_dotenv()
+
+    username = _get_required_env(TEST_USERNAME_ENV)
+    password = _get_required_env(TEST_PASSWORD_ENV)
+    base_url = os.getenv(BASE_URL_ENV, DEFAULT_BASE_URL)
+
+    AUTH_DIR.mkdir(parents=True, exist_ok=True)
+
+    print(f"Global setup: running with browser '{browser_name}'")
+    print("Global setup: log in user and store authenticated browser state")
+
+    with sync_playwright() as playwright:
+        browser_launcher = _get_browser_launcher(playwright, browser_name)
+        browser = browser_launcher.launch()
+        context = browser.new_context()
+        page = context.new_page()
+
+        try:
+            signin_url = f"{base_url}/signin"
+            page.goto(signin_url, wait_until="load")
+
+            sign_in_page = SignInPage(page)
+            sign_in_page.login(username, password)
+            sign_in_page.wait_until_logged_in()
+
+            context.storage_state(path=str(STORAGE_STATE))
+            print(f"Authenticated browser state is stored in {STORAGE_STATE}")
+        finally:
+            context.close()
+            browser.close()
+
 
 def _needs_global_setup(items) -> bool:
     """Return True if at least one collected test requires authentication."""
     for item in items:
-        # Preferred way: explicit marker
         if item.get_closest_marker("authenticated"):
             return True
 
-        # Fallback for demo project structure
         if "authenticated" in str(item.fspath):
             return True
 
     return False
 
+
 def pytest_collection_modifyitems(config, items):
     """
     Run global authentication setup only when collected tests require it.
-
-    This hook is called after pytest collects test items.
-    Setup runs when at least one collected test is marked as authenticated
-    or belongs to the authenticated test area.
     """
     global _setup_ran
 
     if _setup_ran:
-        return  # Avoid running setup multiple times
-    
-    if config.getoption("collectonly"):
-        return  # Skip setup during collection-only runs
+        return
 
-    if _needs_global_setup(items):
-        print("Detected authenticated tests. Running global setup...")
-        global_setup()
-        _setup_ran = True
+    if config.getoption("collectonly"):
+        return
+
+    if not _needs_global_setup(items):
+        return
+
+    # pytest-playwright supports --browser and exposes browser_name fixture.
+    # Here we read the selected browser from pytest option.
+    selected_browsers = config.getoption("browser") or [DEFAULT_BROWSER]
+    browser_name = selected_browsers[0]
+
+    print("Detected authenticated tests. Running global setup...")
+    global_setup(browser_name=browser_name)
+    _setup_ran = True
+
 
 if __name__ == "__main__":
-    # For direct execution, run global setup unconditionally
     global_setup()
