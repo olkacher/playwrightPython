@@ -3,6 +3,17 @@ Global setup for authenticated tests.
 
 Logs in a test user and stores browser authentication state
 for tests that require an authenticated session.
+
+Supports multiple browsers (chromium, firefox, webkit) via pytest-playwright integration.
+The selected browser is automatically detected from pytest options and used for authentication setup.
+
+Usage:
+    pytest                          # Uses default browser (chromium)
+    pytest --browser chromium       # Explicit chromium
+    pytest --browser firefox        # Firefox browser
+    pytest --browser webkit         # WebKit browser
+
+The authenticated session state is stored in .auth/user.json for reuse in tests.
 """
 
 import os
