@@ -1,15 +1,25 @@
 # Playwright Python Example
 
-This repository provides an example implementation of automated testing using Playwright with Python. The example demonstrates how to use the provided template to create and execute test cases for a sample web application.
+This repository provides a comprehensive example implementation of automated testing using Playwright with Python. It demonstrates best practices for creating end-to-end tests with page objects, authentication state management, and multi-browser support.
+
+## Key Features
+
+- **Page Object Model (POM)** - Clean separation of page interactions and test logic
+- **Multi-Browser Support** - Run tests on Chromium, Firefox, and WebKit
+- **Authentication State Management** - Efficient handling of authenticated test scenarios
+- **pytest Integration** - Full pytest features with custom markers and fixtures
+- **Comprehensive Reporting** - HTML, JUnit XML, screenshots, videos, and trace files
+- **Environment Configuration** - Easy management of test URLs and credentials
 
 ## Purpose
 
-The purpose of this example is to show how the Playwright template can be used to:
+This example demonstrates how to:
 - Create Page Object classes for different pages of the application
 - Write test cases that interact with these Page Objects using pytest
 - Utilize common utility classes for consistent setup and teardown of test cases
-- Use global setup and teardown to handle authentication via session storage
+- Use global setup to handle authentication via session storage
 - Implement both public (non-authenticated) and authenticated test scenarios
+- Run tests across multiple browsers efficiently
 
 ## Built With
 
@@ -71,10 +81,11 @@ example/
 │   └── user.json                   # Stored session data
 ├── e2e/
 │   ├── common/                     # Common utilities and fixtures
-│   │   ├── base_page.py           # Base class for all page objects
-│   │   ├── browser_sync_utils.py  # Browser synchronization utilities
-│   │   └── page_objects_fixture.py # pytest fixtures for page objects
-│   ├── pageobjects/               # Page Object Model classes
+│   │   ├── base_page.py            # Base class for all page objects
+│   │   ├── assertion_helpers.py    # Shared assertion helper methods
+│   │   └── page_objects_fixture.py # Pytest fixtures for page objects
+│   ├── pageobjects/                # Page Object Model classes
+│   │   ├── home_page.py
 │   │   ├── sign_in_page.py
 │   │   ├── side_menu_page.py
 │   │   ├── top_menu_page.py
@@ -84,39 +95,70 @@ example/
 │   ├── tests/
 │   │   ├── authenticated/         # Tests requiring authentication
 │   │   │   ├── global/            # Global setup and teardown
-│   │   │   │   ├── global_setup.py    # Authentication setup
+│   │   │   │   ├── global_setup.py    # Authentication setup (multi-browser support)
 │   │   │   │   └── global_teardown.py # Authentication cleanup
-│   │   │   └── test_new_and_check_transaction_suite.py
+│   │   │   ├── test_create_new_transaction.py
+│   │       ├── test_sidebar_menu_items_visible.py
+│   │       └── test_sidebar_menu_navigation.py
 │   │   └── public/                # Public tests (no auth required)
 │   │       ├── test_login_and_logout.py
 │   │       └── test_login_and_logout_without_page_objects.py
 │   └── reports/                   # Test execution reports
 ├── conftest.py                    # pytest configuration and fixtures
 ├── pytest.ini                     # pytest settings
+├── config.py                      # Application configuration
 ├── requirements.txt               # Python dependencies
-├── .env                          # Environment variables
-└── README.md                     # This file
+├── .env                           # Environment variables (local, not in version control)
+└── README.md                      # This file
 ```
 
 ## Configuration
 
+### Environment Variables
+
+**File contents:**
+```env
+# Application URL (optional, defaults to RealWorldApp)
+BASE_URL=http://frontend-ta-realworldapp.apps.os-prod.lab.proficom.de
+
+# Test user credentials (required)
+TEST_USER_NAME=your_username
+TEST_PASSWORD=your_password
+```
+
+**Important:**
+- `.env` file should NOT be committed to version control (it contains credentials)
+- **Never commit actual credentials to the repository**
+
+**Loading Environment Variables:**
+- The `python-dotenv` package automatically loads variables from `.env` on startup
+- Variables are accessible via `os.getenv()` in Python
+- See `conftest.py` and `config.py` for how defaults are applied
+
+### Browser Configuration
+
 The example is configured in `conftest.py` to match the TypeScript `playwright.config.ts` settings:
 
-### Browser Settings
+#### Browser Settings
 - **Headless Mode**: `False` - Browser is visible by default
 - **Browser Arguments**: `--start-maximized` - Browser starts maximized
 - **Viewport**: `1440x900` - Default viewport size
 
-### Timeouts
+#### Supported Browsers
+- **Chromium** (default) - Standard desktop browser
+- **Firefox** - Mozilla Firefox
+- **WebKit** - Safari engine
+
+#### Timeouts
 - **Action Timeout**: `10000ms` - Default timeout for all actions (clicks, fills, etc.)
 
-### Test Execution
+#### Test Execution Settings
 - **Base URL**: Set via environment variable `BASE_URL` (defaults to RealWorldApp URL)
 - **Screenshots**: `only-on-failure` - Captured automatically when tests fail
 - **Videos**: `retain-on-failure` - Recorded and kept only for failed tests
 - **Tracing**: `retain-on-failure` - Debug traces saved for failed tests
 
-### Authentication
+#### Authentication
 - **Storage State**: `.auth/user.json` - Session data for authenticated tests
 - **Markers**: `@pytest.mark.authenticated` - Tests requiring pre-authentication
 - **Markers**: `@pytest.mark.public` - Tests without authentication
@@ -215,23 +257,52 @@ If you have a local version of [RealWorldApp](https://github.com/cypress-io/cypr
 
 ### 3. Setup Authentication (for Authenticated Tests)
 
-Before running authenticated tests, you need to create authentication state:
+Before running authenticated tests, you must create authentication state by running the global setup:
 
+#### Option A: Using Default Browser (Chromium)
 ```bash
 python e2e/tests/authenticated/global/global_setup.py
 ```
 
-This will:
-1. Launch a browser
-2. Navigate to the sign-in page
-3. Login with your credentials from .env
-4. Save the authentication state to `.auth/user.json`
+#### Option B: Using a Specific Browser
+
+**On Linux/macOS (bash):**
+```bash
+# Firefox
+BROWSER=firefox python e2e/tests/authenticated/global/global_setup.py
+
+# WebKit
+BROWSER=webkit python e2e/tests/authenticated/global/global_setup.py
+```
+
+**On Windows PowerShell:**
+```powershell
+# Firefox
+$env:BROWSER = "firefox"; python e2e/tests/authenticated/global/global_setup.py
+
+# WebKit
+$env:BROWSER = "webkit"; python e2e/tests/authenticated/global/global_setup.py
+
+# Chromium (default)
+python e2e/tests/authenticated/global/global_setup.py
+```
+
+**What the setup script does:**
+1. Launches the selected browser
+2. Navigates to the sign-in page
+3. Logs in with credentials from `.env`
+4. Saves the authentication state to `.auth/user.json`
+5. Closes the browser
+
+**Note:** The authentication state file contains session cookies/tokens for the selected browser. If you change browsers, run the setup again to generate state for that browser.
 
 ### 4. Running Tests
 
-#### From Command Line:
+#### Basic Execution (Command Line)
+
+**Bash/Linux/macOS:**
 ```bash
-# Run all tests
+# Run all tests with default browser (chromium)
 pytest e2e/tests/ -v
 
 # Run only public tests
@@ -239,6 +310,80 @@ pytest e2e/tests/public/ -v
 
 # Run only authenticated tests (requires setup first)
 pytest e2e/tests/authenticated/ -v
+
+# Run specific test file
+pytest e2e/tests/public/test_login_and_logout.py -v
+```
+
+**Windows PowerShell:**
+```powershell
+# Run all tests with default browser (chromium)
+pytest e2e/tests/ -v
+
+# Run only public tests
+pytest e2e/tests/public/ -v
+
+# Run only authenticated tests (requires setup first)
+pytest e2e/tests/authenticated/ -v
+
+# Run specific test file
+pytest e2e/tests/public/test_login_and_logout.py -v
+```
+
+#### Multi-Browser Testing
+
+**Bash/Linux/macOS:**
+```bash
+# Run tests with Firefox
+BROWSER=firefox pytest e2e/tests/ -v
+
+# Run tests with WebKit
+BROWSER=webkit pytest e2e/tests/ -v
+```
+
+**Windows PowerShell:**
+```powershell
+# Run tests with Firefox
+$env:BROWSER = "firefox"; pytest e2e/tests/ -v
+
+# Run tests with WebKit
+$env:BROWSER = "webkit"; pytest e2e/tests/ -v
+```
+
+#### Advanced Options
+
+```bash
+# Run with HTML report
+pytest e2e/tests/ --html=e2e/reports/report.html --self-contained-html
+
+# Run in headless mode (tests run without visible browser window)
+pytest e2e/tests/ --headed=false
+
+# Run with specific timeout
+pytest e2e/tests/ --timeout=120
+
+# Run with retries on failure (requires pytest-rerunfailures)
+pytest e2e/tests/ --retries=2
+
+# Run in slow-mo mode (slows down execution, useful for debugging)
+pytest e2e/tests/ --slowmo=1000
+
+# Run tests in parallel (requires pytest-xdist)
+pytest e2e/tests/ -n 2      # 2 workers
+pytest e2e/tests/ -n auto   # Auto-detect CPU cores
+```
+
+#### Test Markers
+
+```bash
+# Run only public tests (no authentication required)
+pytest e2e/tests/ -m public
+
+# Run only authenticated tests
+pytest e2e/tests/ -m authenticated
+
+# Run specific test class
+pytest e2e/tests/public/test_login_and_logout.py::TestLoginAndLogout -v
 ```
 
 #### From VS Code:
