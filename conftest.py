@@ -15,17 +15,10 @@ from dotenv import load_dotenv
 
 from config import (
     STORAGE_STATE,
-    BASE_URL_ENV,
+    BASE_URL,
     DEFAULT_TIMEOUT_MS,
-    TEST_USERNAME_ENV,
-    DEFAULT_BASE_URL,
+    TEST_USERNAME,
 )
-
-# Load environment variables
-load_dotenv()
-
-# Configuration (equivalent to baseURL and other settings)
-BASE_URL = os.getenv(BASE_URL_ENV, DEFAULT_BASE_URL)
 
 @pytest.fixture(scope="session")
 def browser_type_launch_args(browser_type_launch_args):
@@ -78,7 +71,7 @@ def pytest_sessionstart(session):
     """
     print("Global test environment setup...")
     print(f"Target application: {BASE_URL}")
-    print(f"Test user: {TEST_USERNAME_ENV}")
+    print(f"Test user: {TEST_USERNAME}")
 
 def pytest_sessionfinish(session, exitstatus):
     """
